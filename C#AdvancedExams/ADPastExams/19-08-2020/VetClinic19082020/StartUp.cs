@@ -33,7 +33,7 @@ namespace VetClinic
             Console.WriteLine(oldestPet); // Zak 4 (Jon)
 
             // Get Pet
-            Pet pet = clinic.GetPet("Bella");
+            Pet pet = clinic.GetPet("Bella","Mia");
             Console.WriteLine(pet); // Bella 2 (Mia)
 
             // Count

@@ -1,118 +1,76 @@
 ﻿using System;
 
-namespace _02._190820
+
+namespace Bee
 {
     class Program
     {
+        public class Position
+        {
+            public int Row { get; set; }
+            public int Col { get; set; }
+        }
         static void Main(string[] args)
         {
             int n = int.Parse(Console.ReadLine());
-            char[,] matrix = ReadMatrix(n);
-            int beeRow = 0;
-            int beeCol = 0;
-            for (int row = 0; row < matrix.GetLength(0); row++)
-            {
-                for (int col = 0; col < matrix.GetLength(1); col++)
-                {
-                    if (matrix[row, col] == 'B')
-                    {
-                        beeRow = row;
-                        beeCol = col;
-                    }
-                }
-            }
-            string command = string.Empty;
+            var matrix = new char[n, n];
+            var position = ReadMatrix(matrix);
             int flowersCount = 0;
-            int nextRow = 0;
-            int nextCol = 0;
-            bool GotLost = false;
-
-            while ((command = Console.ReadLine()) != "End"
-                && GotLost == false)
+            bool gotLost = false;
+            while (true)
             {
-                matrix[beeRow, beeCol] = '.';
-                if (command == "right")
+                var command = Console.ReadLine();
+                if (command == "End")
                 {
-                    beeCol++;
-                    nextRow = beeRow;
-                    nextCol = beeCol + 1;
+                    break;
                 }
-                else if (command == "left")
-                {
-                    beeCol--;
-                    nextRow = beeRow;
-                    nextCol = beeCol - 1;
-                }
-                else if (command == "up")
-                {
-                    beeRow--;
-                    nextRow = beeRow - 1;
-                    nextCol = beeCol;
-                }
-                else if (command == "down")
-                {
-                    beeRow++;
-                    nextRow = beeRow + 1;
-                    nextCol = beeCol;
-                }
+                matrix[position.Row, position.Col] = '.';
+                FollowCommand(command, position);
 
-                if (!ContinueGame(beeRow, beeCol, n))
+                if (ValidatePosition(position.Row, position.Col, matrix))
                 {
-                    GotLost = true;
-                }
-                else
-                {
-                    if (matrix[beeRow, beeCol] == 'f')
+                    if (matrix[position.Row, position.Col] == 'O')
+                    {
+                        matrix[position.Row, position.Col] = '.';
+                        FollowCommand(command, position);
+                        if (!ValidatePosition(position.Row, position.Col, matrix))
+                        {
+                            gotLost = true;
+                        }
+                    }
+                    if (matrix[position.Row, position.Col] == 'f')
                     {
                         flowersCount++;
-                        matrix[beeRow, beeCol] = 'B';
-                    }
-                    else if (matrix[beeRow, beeCol] == 'O')
-                    {
-                        matrix[beeRow, beeCol] = '.';
-                        if (matrix[nextRow, nextCol] == 'f')
-                        {
-                            flowersCount++;
-                        }
-                        matrix[nextRow, nextCol] = 'B';
-                        beeRow = nextRow;
-                        beeCol = nextCol;
                     }
                 }
+                if (!ValidatePosition(position.Row, position.Col, matrix)
+                    || gotLost == true)
+                {
+                    gotLost = true;
+                    break;
+                }
+                matrix[position.Row, position.Col] = 'B';
             }
 
-            if (GotLost)
+            if (gotLost)
             {
                 Console.WriteLine("The bee got lost!");
             }
-            if (flowersCount >= 5)
-            {
-                Console.WriteLine($"Great job, the bee managed to pollinate" +
-                    $" {flowersCount} flowers!");
-            }
-            else
+            if (flowersCount < 5)
             {
                 Console.WriteLine($"The bee couldn't pollinate the flowers," +
                     $" she needed {5 - flowersCount} flowers more");
             }
-            Print(matrix);
-        }
-
-        static char[,] ReadMatrix(int n)
-        {
-            char[,] matrix = new char[n, n];
-            for (int row = 0; row < matrix.GetLength(0); row++)
+            else
             {
-                string input = Console.ReadLine();
-                for (int col = 0; col < matrix.GetLength(1); col++)
-                {
-                    matrix[row, col] = input[col];
-                }
+                Console.WriteLine($"Great job, the bee managed to pollinate " +
+                    $"{flowersCount} flowers!");
             }
-            return matrix;
+            Print(matrix);
+
         }
 
-        static void Print(char[,] matrix)
+        private static void Print(char[,] matrix)
         {
             for (int row = 0; row < matrix.GetLength(0); row++)
             {
@@ -124,14 +82,58 @@ namespace _02._190820
             }
         }
 
-        static bool ContinueGame(int row, int col, int n)
+        private static void FollowCommand(string command, Position position)
         {
-            if (row >= 0 && row < n
-                && col >= 0 && col < n)
+
+            if (command == "up")
             {
-                return true;
+                position.Row--;
             }
-            return false;
+            if (command == "down")
+            {
+                position.Row++;
+            }
+            if (command == "left")
+            {
+                position.Col--;
+            }
+            if (command == "right")
+            {
+                position.Col++;
+            }
+        }
+
+        private static bool ValidatePosition(int row, int col,
+            char[,] matrix)
+        {
+            if (row < 0 || row >= matrix.GetLength(0))
+            {
+                return false;
+            }
+            if (col < 0 || col >= matrix.GetLength(1))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private static Position ReadMatrix(char[,] matrix)
+        {
+            var position = new Position();
+            for (int row = 0; row < matrix.GetLength(0); row++)
+            {
+                var line = Console.ReadLine();
+                for (int col = 0; col < matrix.GetLength(1); col++)
+                {
+                    matrix[row, col] = line[col];
+                    if (matrix[row, col] == 'B')
+                    {
+                        position.Row = row;
+                        position.Col = col;
+                    }
+                }
+            }
+            return position;
         }
     }
 }

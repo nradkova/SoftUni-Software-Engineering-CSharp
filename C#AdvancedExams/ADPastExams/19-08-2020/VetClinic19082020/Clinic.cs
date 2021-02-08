@@ -1,8 +1,6 @@
-﻿using Microsoft.VisualBasic.CompilerServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace VetClinic
@@ -17,7 +15,7 @@ namespace VetClinic
         }
 
         public int Capacity { get; set; }
-        public int Count { get { return pets.Count; } }
+        public int Count => pets.Count;
 
         public void Add(Pet pet)
         {
@@ -29,38 +27,22 @@ namespace VetClinic
         public bool Remove(string name)
         {
             Pet petToRemove = pets.FirstOrDefault(x => x.Name == name);
-            if (petToRemove != null)
-            {
-                pets.Remove(petToRemove);
-                return true;
-            }
-            return false;
+
+            return pets.Remove(petToRemove);
         }
-        public Pet GetPet(string name)
+
+        public Pet GetPet(string name, string owner)
         {
-            Pet pet = pets.FirstOrDefault
-                (x => x.Name == name);
-            if (pet != null)
-            {
-                return pet;
-            }
-            return null;
+            return pets.FirstOrDefault(x => x.Name == name 
+                        && x.Owner == owner);
         }
+
         public Pet GetOldestPet()
         {
-            if (pets.Count > 0)
-            {
-                int maxAge = pets.Max(x => x.Age);
-                foreach (var pet in pets)
-                {
-                    if (pet.Age == maxAge)
-                    {
-                        return pet;
-                    }
-                }
-            }
-            return null;
+            int maxAge = pets.Max(x => x.Age);
+            return pets.FirstOrDefault(x => x.Age == maxAge);
         }
+
         public string GetStatistics()
         {
             StringBuilder sb = new StringBuilder();
