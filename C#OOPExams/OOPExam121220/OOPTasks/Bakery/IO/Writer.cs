@@ -6,6 +6,30 @@
 
     public class Writer : IWriter
     {
+        //private string path = "../../../result.txt";
+        //public Writer()
+        //{
+        //    using (StreamWriter writer=new StreamWriter(path))
+        //    {
+        //        writer.Write("");
+        //    }
+        //}
+        //public void Write(string message)
+        //{
+        //    using (StreamWriter writer = new StreamWriter(path,true))
+        //    {
+        //        writer.Write(message);
+        //    }
+        //}
+
+        //public void WriteLine(string message)
+        //{
+        //    using(StreamWriter writer = new StreamWriter(path, true))
+        //    {
+        //        writer.WriteLine(message);
+        //    }
+        //}
+
         public void Write(string message)
         {
             Console.Write(message);
