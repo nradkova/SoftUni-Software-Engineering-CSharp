@@ -1,101 +1,84 @@
 using NUnit.Framework;
 using System;
-//using BankSafe;
 
 namespace BankSafe.Tests
 {
     public class BankVaultTests
     {
-        private Item firstItem;
-        private Item secondItem;
+        private Item first;
+        private Item second;
         private BankVault bankVault;
-
         [SetUp]
         public void Setup()
         {
-            firstItem = new Item("AAA", "aaa");
-            secondItem = new Item("BBB", "bbb");
+            first = new Item("AAA", "aaa");
+            second = new Item("BBB", "bbb");
             bankVault = new BankVault();
         }
 
         [Test]
-        public void Create12EmptyVaultCells_WhenInitialized()
+        public void Initializing_WorksCorrectly()
         {
             bankVault = new BankVault();
-            Assert.IsNotNull(bankVault.VaultCells);
             Assert.AreEqual(bankVault.VaultCells.Count, 12);
-            Assert.AreEqual(bankVault.VaultCells["A1"], null);
+            Assert.IsNotNull(bankVault.VaultCells);
+        }
+        
+        [Test]
+        public void AddingItem_WorksCorrectly()
+        {
+            string result=bankVault.AddItem("A1", first);
+            string expectedResult= $"Item:{first.ItemId} saved successfully!";
+            Assert.AreEqual(bankVault.VaultCells["A1"],first);
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        [Test]
+        public void AddingItemToNonExistingCell_Throws()
+        {
+            Assert.Throws<ArgumentException>(()
+                => bankVault.AddItem("xxx", first));
+        }
+
+        [Test]
+        public void AddingItemToNotEmptyCell_Throws()
+        {
+            bankVault.AddItem("A1", first);
+            Assert.Throws<ArgumentException>(()
+                => bankVault.AddItem("A1", second));
+        }
+
+        [Test]
+        public void AddingSameItemToDifferentCell_Throws()
+        {
+            bankVault.AddItem("A1", first);
+            Assert.Throws<InvalidOperationException>(()
+                => bankVault.AddItem("A2", first));
         }
       
         [Test]
-        public void AddingItemToNonexistingCell_ThrowsException()
+        public void RemovingItem_WorksCorrectly()
         {
-            Assert.Throws<ArgumentException>(()
-                => bankVault.AddItem("xxx", firstItem));
-        }
-
-        [Test]
-        [TestCase("A1")]
-        public void AddingItem_ShouldWorkProperly
-            (string cell)
-        {
-           string result= bankVault.AddItem(cell, firstItem);
-            string expectedResult =
-                $"Item:{firstItem.ItemId} saved successfully!";
-
-            Assert.IsTrue(bankVault.VaultCells[cell] == firstItem);
+            bankVault.AddItem("A1", first);
+            string result = bankVault.RemoveItem("A1", first);
+            string expectedResult = $"Remove item:{first.ItemId} successfully!";
+            Assert.AreEqual(bankVault.VaultCells["A1"], null);
             Assert.AreEqual(expectedResult, result);
         }
 
         [Test]
-        [TestCase("A1")]
-        public void AddingItemToFilledCell_ThrowsException
-            (string cell)
-        {
-            bankVault.AddItem(cell, firstItem);
-            Assert.Throws<ArgumentException>(()
-                => bankVault.AddItem(cell, secondItem));
-        }
-
-        [Test]
-        [TestCase("A1","A2")]
-        public void AddingSameItemAgain_ThrowsException
-           (string firstCell,string secondCell)
-        {
-            bankVault.AddItem(firstCell, firstItem);
-            Assert.Throws<InvalidOperationException>(()
-                => bankVault.AddItem(secondCell, firstItem));
-        }
-
-        [Test]
-        public void RemovingItemToNonexistingCell_ThrowsException()
+        public void RemovingItemFromNonExistingCell_Throws()
         {
             Assert.Throws<ArgumentException>(()
-                => bankVault.RemoveItem("xxx", firstItem));
+                => bankVault.RemoveItem("xxx", first));
         }
 
         [Test]
-        [TestCase("A1")]
-        public void RemovingItem_ShouldWorkProperly
-            (string cell)
+        public void RemovinItemFromWrongCell_Throws()
         {
-            bankVault.AddItem(cell, firstItem);
-            string result=bankVault.RemoveItem(cell, firstItem);
-            string expectedResult =
-                $"Remove item:{firstItem.ItemId} successfully!";
-
-            Assert.IsTrue(bankVault.VaultCells[cell] == null);
-            Assert.AreEqual(expectedResult, result);
-        }
-       
-        [Test]
-        [TestCase("A1")]
-        public void RemovingNonexistingItemFromdCell_ThrowsException
-            (string cell)
-        {
-            bankVault.AddItem(cell, firstItem);
+            bankVault.AddItem("A1", first);
             Assert.Throws<ArgumentException>(()
-                => bankVault.RemoveItem(cell, secondItem));
+                => bankVault.RemoveItem("A2", first));
         }
     }
 }
