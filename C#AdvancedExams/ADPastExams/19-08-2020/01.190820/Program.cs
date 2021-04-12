@@ -2,58 +2,53 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace _01._190820
+namespace Practice
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Stack<int> lilies = new Stack<int>(
-                Console.ReadLine().Split(", ")
-                .Select(int.Parse).ToList());
-            Queue<int> roses = new Queue<int>(
-                Console.ReadLine().Split(", ")
-                .Select(int.Parse).ToList());
-            int wreathCount = 0;
-            int leftFlowers = 0;
-
-            while (lilies.Count > 0 && roses.Count > 0)
+            Stack<int> lilies = new Stack<int>
+                (Console.ReadLine()
+                .Split(", ")
+                .Select(int.Parse));
+            Queue<int> roses = new Queue<int>
+                (Console.ReadLine()
+                .Split(", ")
+                .Select(int.Parse));
+            int target = 5;
+            int flowersLeft = 0;
+            int wreaths = 0;
+            while (lilies.Count > 0 & roses.Count > 0)
             {
-                int currentLilies = lilies.Peek();
-                int currentRoses = roses.Peek();
-                if (currentLilies + currentRoses == 15)
+                var lily = lilies.Pop();
+                var rose = roses.Peek();
+                if (lily + rose == 15)
                 {
-                    wreathCount++;
-                    lilies.Pop();
                     roses.Dequeue();
+                    wreaths++;
                 }
-                else if (currentLilies + currentRoses < 15)
+                else if (lily + rose > 15)
                 {
-                    leftFlowers += lilies.Pop() + roses.Dequeue();
+                    lilies.Push(lily - 2);
                 }
-                else
+                else 
                 {
-                    if (currentLilies < 2)
-                    {
-                        leftFlowers += lilies.Pop() + roses.Dequeue();
-                    }
-                    else
-                    {
-                        lilies.Push(lilies.Pop() - 2);
-                    }
+                    roses.Dequeue();
+                    flowersLeft += lily + rose;
                 }
             }
-
-            wreathCount += leftFlowers / 15;
-            if (wreathCount >= 5)
+            wreaths += flowersLeft / 15;
+            if (wreaths >= target)
             {
-                Console.WriteLine($"You made it, you are going to the competition with 5 wreaths!");
+                Console.WriteLine($"You made it, you are going to " +
+                    $"the competition with {wreaths} wreaths!");
             }
             else
             {
-                Console.WriteLine($"You didn't make it, you need {5 - wreathCount} wreaths more!");
+                Console.WriteLine($"You didn't make it," +
+                    $" you need {target - wreaths} wreaths more!");
             }
         }
-
     }
 }
