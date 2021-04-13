@@ -1,172 +1,195 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace _10.RadioactiveBunnies
+namespace RadioactiveBunnies
 {
     class Program
     {
+        private static char[,] table;
+        private static int playerRow = 0;
+        private static int playerCol = 0;
+        private static bool playerLoose = false;
+
         static void Main(string[] args)
         {
-            int[] dimensions = Console.ReadLine().Split()
-                .Select(int.Parse).ToArray();
-            int x = dimensions[0];
-            int y = dimensions[1];
-            char[,] matrix = ReadMatrix(x, y);
-            Queue<char> commands = new Queue<char>(Console.ReadLine().ToCharArray());
+            int[] dimensions = Console.ReadLine()
+                .Split()
+                .Select(int.Parse)
+                .ToArray();
+            int n = dimensions[0];
+            int m = dimensions[1];
+            table = ReadTable(n, m);
 
-            int initialRow = 0;
-            int initialCol = 0;
-            for (int row = 0; row < matrix.GetLength(0); row++)
+            bool playerWin = false;
+
+            string commandLine = Console.ReadLine();
+            for (int i = 0; i < commandLine.Length; i++)
             {
-                for (int col = 0; col < matrix.GetLength(1); col++)
+                var command = commandLine[i];
+                var prevRow = playerRow;
+                var prevCol = playerCol;
+
+                ExecuteCommand(command);
+
+                if (AreOutOfTable(playerRow, playerCol))
                 {
-                    if (matrix[row, col] == 'P')
-                    {
-                        initialRow = row;
-                        initialCol = col;
-                    }
+                    table[prevRow, prevCol] = '.';
+                    playerWin = true;
                 }
-            }
-            bool winGame = false;
-            bool loseGame = false;
-            int nextRow = 0;
-            int nextCol = 0;
-
-            while (commands.Count > 0)
-            {
-                char newCommand = commands.Dequeue();
-                FindNextPosition(initialRow, initialCol, ref nextRow, ref nextCol, newCommand);
-                if (!ContinueMove(nextRow, nextCol, x, y))
+                else if (table[playerRow, playerCol] == 'B')
                 {
-                    winGame = true;
-                    matrix[initialRow, initialCol] = '.';
+                    table[playerRow, playerCol] = 'B';
+                    playerLoose = true;
                 }
                 else
                 {
-                    if (matrix[nextRow, nextCol] == 'B')
-                    {
-                        loseGame = true;
-                        matrix[initialRow, initialCol] = '.';
-                    }
-                    else
-                    {
-                        matrix[initialRow, initialCol] = '.';
-                        initialRow = nextRow;
-                        initialCol = nextCol;
-                    }
+                    table[playerRow, playerCol] = 'P';
+                    table[prevRow, prevCol] = '.';
                 }
-                for (int row = 0; row < matrix.GetLength(0); row++)
+
+                MultiplyBunnies();
+
+                if (playerWin)
                 {
-                    for (int col = 0; col < matrix.GetLength(1); col++)
-                    {
-                        if (matrix[row, col] == 'B')
-                        {
-                            if (ContinueMove(row - 1, col, x, y)
-                                && matrix[row - 1, col] == '.')
-                            {
-                                matrix[row - 1, col] = 'N';
-                            }
-                            if (ContinueMove(row + 1, col, x, y)
-                                && matrix[row + 1, col] == '.')
-                            {
-                                matrix[row + 1, col] = 'N';
-                            }
-                            if (ContinueMove(row, col - 1, x, y)
-                                && matrix[row, col - 1] == '.')
-                            {
-                                matrix[row, col - 1] = 'N';
-                            }
-                            if (ContinueMove(row, col + 1, x, y)
-                                && matrix[row, col + 1] == '.')
-                            {
-                                matrix[row, col + 1] = 'N';
-                            }
-                        }
-                    }
+                    playerRow = prevRow;
+                    playerCol = prevCol;
+                    break;
                 }
-                for (int row = 0; row < matrix.GetLength(0); row++)
+                if (playerLoose)
                 {
-                    for (int col = 0; col < matrix.GetLength(1); col++)
-                    {
-                        if (matrix[row, col] == 'N')
-                        {
-                            matrix[row, col] ='B';
-                        }
-                    }
-                }
-                if (winGame)
-                {
-                    PrintMatrix(matrix);
-                    Console.WriteLine($"won: {initialRow} {initialCol}");
-                    return;
-                }
-                if (loseGame)
-                {
-                    PrintMatrix(matrix);
-                    Console.WriteLine($"dead: {nextRow} {nextCol}");
-                    return;
+                    break;
                 }
             }
+
+            PrintTable();
+
+            if (playerWin)
+            {
+                Console.WriteLine($"won: {playerRow} {playerCol}");
+            }
+            if (playerLoose)
+            {
+                Console.WriteLine($"dead: {playerRow} {playerCol}");
+            }
+
         }
 
-        private static void FindNextPosition(int initialRow, int initialCol, ref int nextRow, ref int nextCol, char newCommand)
-        {
-            if (newCommand == 'U')
-            {
-                nextRow = initialRow - 1;
-                nextCol = initialCol;
-            }
-            else if (newCommand == 'D')
-            {
-                nextRow = initialRow + 1;
-                nextCol = initialCol;
-            }
-            else if (newCommand == 'R')
-            {
-                nextRow = initialRow;
-                nextCol = initialCol + 1;
-            }
-            else if (newCommand == 'L')
-            {
-                nextRow = initialRow;
-                nextCol = initialCol - 1;
-            }
-        }
 
-        public static bool ContinueMove(int row, int col, int x, int y)
+        private static void PrintTable()
         {
-            bool continueMoves = false;
-            if (row >= 0 && row < x
-                && col >= 0 && col < y)
+            for (int row = 0; row < table.GetLength(0); row++)
             {
-                continueMoves = true;
-            }
-            return continueMoves;
-        }
-        public static char[,] ReadMatrix(int x, int y)
-        {
-            char[,] matrix = new char[x, y];
-            for (int row = 0; row < matrix.GetLength(0); row++)
-            {
-                char[] input = Console.ReadLine().ToCharArray();
-                for (int col = 0; col < matrix.GetLength(1); col++)
+                for (int col = 0; col < table.GetLength(1); col++)
                 {
-                    matrix[row, col] = input[col];
-                }
-            }
-            return matrix;
-        }
-        public static void PrintMatrix(char[,] matrix)
-        {
-            for (int row = 0; row < matrix.GetLength(0); row++)
-            {
-                for (int col = 0; col < matrix.GetLength(1); col++)
-                {
-                    Console.Write(matrix[row, col]);
+                    Console.Write(table[row, col]);
                 }
                 Console.WriteLine();
             }
+        }
+
+        private static void MultiplyBunnies()
+        {
+            for (int row = 0; row < table.GetLength(0); row++)
+            {
+                for (int col = 0; col < table.GetLength(1); col++)
+                {
+                    if (table[row, col] == 'B')
+                    {
+                        CreateNewBunny(row - 1, col);
+                        CreateNewBunny(row + 1, col);
+                        CreateNewBunny(row, col - 1);
+                        CreateNewBunny(row, col + 1);
+
+                    }
+                }
+            }
+            RestoreBunniesPositions();
+        }
+
+        private static void RestoreBunniesPositions()
+        {
+            for (int row = 0; row < table.GetLength(0); row++)
+            {
+                for (int col = 0; col < table.GetLength(1); col++)
+                {
+                    if (table[row, col] == 'N')
+                    {
+                        table[row, col] = 'B';
+                    }
+                }
+            }
+        }
+
+        private static void CreateNewBunny(int row, int col)
+        {
+            if (AreOutOfTable(row, col))
+            {
+                return;
+            }
+            if (table[row, col] == 'P')
+            {
+                playerLoose = true;
+                table[row, col] = 'N';
+                return;
+            }
+            if (table[row, col] == '.')
+            {
+                table[row, col] = 'N';
+            }
+
+            return;
+        }
+
+        private static bool AreOutOfTable(int row, int col)
+        {
+            if (row < 0 || row >= table.GetLength(0))
+            {
+                return true;
+            }
+            if (col < 0 || col >= table.GetLength(1))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static void ExecuteCommand(char command)
+        {
+            if (command == 'U')
+            {
+                playerRow--;
+            }
+            if (command == 'D')
+            {
+                playerRow++;
+            }
+            if (command == 'R')
+            {
+                playerCol++;
+            }
+            if (command == 'L')
+            {
+                playerCol--;
+            }
+        }
+
+        private static char[,] ReadTable(int n, int m)
+        {
+            char[,] result = new char[n, m];
+            for (int row = 0; row < n; row++)
+            {
+                string line = Console.ReadLine();
+                for (int col = 0; col < m; col++)
+                {
+                    result[row, col] = line[col];
+                    if (result[row, col] == 'P')
+                    {
+                        playerRow = row;
+                        playerCol = col;
+                    }
+                }
+            }
+            return result;
         }
     }
 }
