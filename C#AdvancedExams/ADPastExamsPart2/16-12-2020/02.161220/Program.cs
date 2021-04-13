@@ -1,134 +1,134 @@
 ﻿using System;
 
-namespace _02.Selling
+namespace Selling
 {
     class Program
     {
-        private static int row;
-        private static int col;
         private static char[,] table;
+        private static int playerRow = 0;
+        private static int playerCol = 0;
+
         static void Main(string[] args)
         {
-            int n = int.Parse(Console.ReadLine());
-            row = 0;
-            col = 0;
+            int n =int.Parse(Console.ReadLine());
             table = ReadTable(n);
-            int moneySaved = 0;
-           
-            while (true)
+
+            bool isOut = false;
+            int collectedSum =0;
+            while (collectedSum<50)
             {
-                string command = Console.ReadLine();
-                table[row, col] = '-';
-                FollowCommand(command);
-                if (IsValidPosition())
+                string command =Console.ReadLine();
+                ExecuteCommand(command);
+
+                if (IsOutOfTable())
                 {
-                    if (char.IsDigit(table[row, col]))
-                    {
-                        moneySaved += int.Parse(table[row, col].ToString());
-                    }
-                    if (table[row, col] == 'O')
-                    {
-                        table[row, col] = '-';
-                        MoveToNextPillar();
-                    }
-                    table[row, col] = 'S';
-                }
-                else
-                {
+                    isOut = true;
                     break;
                 }
-                if (moneySaved>=50)
+                if (char.IsDigit(table[playerRow, playerCol]))
                 {
-                    break;
+                    collectedSum += 
+                        int.Parse(table[playerRow, playerCol].ToString());
                 }
+                if (table[playerRow, playerCol]=='O')
+                {
+                    table[playerRow, playerCol] = '-';
+                    FindNextPillar();
+                }
+                table[playerRow, playerCol] = 'S';
             }
-            if (moneySaved>=50)
-            {
-                Console.WriteLine("Good news! You succeeded " +
-                    "in collecting enough money!");
-            }
-            else
+
+            if (isOut)
             {
                 Console.WriteLine("Bad news, you are out of the bakery.");
             }
-            Console.WriteLine($"Money: { moneySaved}");
+            else
+            {
+                Console.WriteLine("Good news! " +
+                    "You succeeded in collecting enough money!");
+            }
+
+            Console.WriteLine($"Money: {collectedSum}");
+
             PrintTable();
-           
         }
 
         private static void PrintTable()
         {
-            for (int r = 0; r < table.GetLength(0); r++)
+            for (int row = 0; row < table.GetLength(0); row++)
             {
-                for (int c = 0; c < table.GetLength(1); c++)
+                for (int col = 0; col < table.GetLength(1); col++)
                 {
-                    Console.Write(table[r,c]);
+                    Console.Write(table[row, col]);
                 }
                 Console.WriteLine();
             }
         }
 
-        private static void MoveToNextPillar()
+        private static void FindNextPillar()
         {
-            for (int r = 0; r < table.GetLength(0); r++)
+            for (int row = 0; row < table.GetLength(0); row++)
             {
-                for (int c = 0; c < table.GetLength(1); c++)
+                for (int col = 0; col < table.GetLength(1); col++)
                 {
-                    if (table[r, c] == 'O')
+                    if (table[row, col] == 'O')
                     {
-                        row = r;
-                        col = c;
+                        playerRow = row;
+                        playerCol = col;
+                        table[row, col] = '-';
                     }
                 }
             }
         }
 
-        private static bool IsValidPosition()
+        private static bool IsOutOfTable()
         {
-            if (row < 0 || row >= table.GetLength(0))
+            if (playerRow < 0 || playerRow >= table.GetLength(0))
             {
-                return false;
+                return true;
             }
-            if (col < 0 || col >= table.GetLength(1))
+            if (playerCol < 0 || playerCol >= table.GetLength(1))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
-        private static void FollowCommand(string command)
+        private static void ExecuteCommand(string command)
         {
-            if (command == "up")
+            table[playerRow, playerCol] = '-';
+
+            if (command=="right")
             {
-                row--;
-            }
-            if (command == "down")
-            {
-                row++;
+                playerCol++;
             }
             if (command == "left")
             {
-                col--;
+                playerCol--;
             }
-            if (command == "right")
+            if (command == "down")
             {
-                col++;
+                playerRow++;
+            }
+            if (command == "up")
+            {
+                playerRow--;
             }
         }
 
         private static char[,] ReadTable(int n)
         {
-            var result = new char[n, n];
-            for (int r = 0; r < result.GetLength(0); r++)
+            char[,] result = new char[n, n];
+            for (int row = 0; row < n; row++)
             {
-                var line = Console.ReadLine();
-                for (int c = 0; c < result.GetLength(1); c++)
+                string line =Console.ReadLine();
+                for (int col = 0; col < n; col++)
                 {
-                    result[r, c] = line[c];
-                    if (result[r,c]=='S')
+                    result[row, col] = line[col];
+                    if (line[col]=='S')
                     {
-                        row = r;
-                        col = c;
+                        playerRow = row;
+                        playerCol = col;
                     }
                 }
             }
