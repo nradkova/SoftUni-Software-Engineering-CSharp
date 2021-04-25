@@ -16,7 +16,7 @@ namespace _2
             table = ReadTable(rows);
 
             bool hasLost = false;
-            bool hasWin = false;
+            bool hasWon = false;
             while (true)
             {
                 string[] commandArgs = Console.ReadLine()
@@ -40,17 +40,21 @@ namespace _2
                 }
                 if (table[playerRow][playerCol] == 'P')
                 {
-                    hasWin = true;
+                    hasWon = true;
                     hasLost = false;
                     table[playerRow][playerCol] = '-';
                 }
                 if (lives <= 0)
                 {
                     hasLost = true;
+                    if (hasWon)
+                    {
+                        hasLost = true;
+                    }
                     table[playerRow][playerCol] = 'X';
                 }
 
-                if (hasWin)
+                if (hasWon)
                 {
                     break;
                 }
@@ -59,12 +63,13 @@ namespace _2
                     break;
                 }
             }
-            if (hasWin)
+
+            if (hasWon)
             {
                 Console.WriteLine($"Mario has successfully" +
                     $" saved the princess! Lives left: {lives}");
             }
-            else if (hasLost)
+            if (hasLost)
             {
                 Console.WriteLine($"Mario died at " +
                     $"{playerRow};{playerCol}.");
