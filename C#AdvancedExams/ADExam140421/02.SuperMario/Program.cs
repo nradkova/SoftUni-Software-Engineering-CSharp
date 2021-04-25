@@ -41,7 +41,6 @@ namespace _2
                 if (table[playerRow][playerCol] == 'P')
                 {
                     hasWon = true;
-                    hasLost = false;
                     table[playerRow][playerCol] = '-';
                 }
                 if (lives <= 0)
