@@ -49,7 +49,7 @@ namespace _2
                     hasLost = true;
                     if (hasWon)
                     {
-                        hasLost = true;
+                        hasLost = false;
                     }
                     table[playerRow][playerCol] = 'X';
                 }
